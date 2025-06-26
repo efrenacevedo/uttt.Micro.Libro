@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using uttt.Micro.Libro.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +45,13 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<uttt.Micro.Libro.Percistence.ContextoLibreria>();
+    dbContext.Database.Migrate();
+}
+
 
 app.MapControllers();
 
