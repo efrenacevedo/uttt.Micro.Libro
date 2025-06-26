@@ -1,0 +1,21 @@
+﻿services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "Strongpa$$w0rd!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+  
+
+  uttt-micro-service:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=bdEfren;user=sa;password=Strongpa$$w0rd!;TrustServerCertificate=true;
+    depends_on:
+      - sqlserver  

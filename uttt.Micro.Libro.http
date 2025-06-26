@@ -1,0 +1,6 @@
+@uttt.Micro.Libro_HostAddress = http://localhost:5030
+
+GET {{uttt.Micro.Libro_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
