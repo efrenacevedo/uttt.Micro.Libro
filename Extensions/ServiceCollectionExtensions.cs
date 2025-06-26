@@ -12,7 +12,6 @@ namespace uttt.Micro.Libro.Extensions
             services.AddControllers().AddFluentValidation(cfg => cfg.RegisterValidatorsFromAssemblyContaining<Nuevo>());
             services.AddDbContext<ContextoLibreria>(options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
-           // services.AddDbContext<ContextoLibreria>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             services.AddCors(options =>
             {
                 options.AddPolicy("",
