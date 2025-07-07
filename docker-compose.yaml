@@ -1,13 +1,16 @@
 ﻿services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sqlserver
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
     environment:
-      SA_PASSWORD: "Strongpa$$w0rd!"
-      ACCEPT_EULA: "Y"
+      MYSQL_ROOT_PASSWORD: Strongpa$$w0rd!
+      MYSQL_DATABASE: bdEfren
+      MYSQL_USER: efren
+      MYSQL_PASSWORD: Strongpa$$w0rd!
     ports:
-      - "1433:1433"
-  
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
 
   uttt-micro-service:
     build: .
@@ -16,6 +19,9 @@
     environment:
       - ASPNETCORE_URLS=http://+:5000
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=bdEfren;user=sa;password=Strongpa$$w0rd!;TrustServerCertificate=true;
+      - ConnectionStrings__DefaultConnection=server=mysql;port=3306;database=bdEfren;user=efren;password=Strongpa$$w0rd!;
     depends_on:
-      - sqlserver  
+      - mysql
+
+volumes:
+  mysql_data:

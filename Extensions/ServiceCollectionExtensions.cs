@@ -10,7 +10,9 @@ namespace uttt.Micro.Libro.Extensions
     {
         public static IServiceCollection AddCustomServices(this IServiceCollection services, IConfiguration configuration) {
             services.AddControllers().AddFluentValidation(cfg => cfg.RegisterValidatorsFromAssemblyContaining<Nuevo>());
-            services.AddDbContext<ContextoLibreria>(options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            //services.AddDbContext<ContextoLibreria>(options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ContextoLibreria>(options =>   options.UseMySQL(configuration.GetConnectionString("DefaultConnection")));
+
 
             services.AddCors(options =>
             {

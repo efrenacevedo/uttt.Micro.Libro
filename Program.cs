@@ -3,14 +3,27 @@ using uttt.Micro.Libro.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//  CORS policy
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "https://vista-libros-autores-xge2-efrenacevedos-projects.vercel.app"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+// Resto de servicios
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddCustomServices(builder.Configuration);
 
 
 
@@ -44,15 +57,16 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
+
+// Middleware
+app.UseHttpsRedirection();
+
+//  Aquí activas la política CORS
+app.UseCors(MyAllowSpecificOrigins);
+
 app.UseAuthorization();
 
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<uttt.Micro.Libro.Percistence.ContextoLibreria>();
-    dbContext.Database.Migrate();
-}
-
-
+// Mapear controladores
 app.MapControllers();
 
 app.Run();

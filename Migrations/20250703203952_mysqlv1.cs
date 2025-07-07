@@ -6,25 +6,29 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace uttt.Micro.Libro.Migrations
 {
     /// <inheritdoc />
-    public partial class postgres : Migration
+    public partial class mysqlv1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("MySQL:Charset", "utf8mb4");
+
             migrationBuilder.CreateTable(
                 name: "LibreriaMateriales",
                 columns: table => new
                 {
-                    LibreriaMaterialId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Titulo = table.Column<string>(type: "text", nullable: false),
-                    FechaPublicacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    AutorLibro = table.Column<Guid>(type: "uuid", nullable: true),
-                    NewData = table.Column<int>(type: "integer", nullable: false)
+                    LibreriaMaterialId = table.Column<Guid>(type: "char(36)", nullable: false),
+                    Titulo = table.Column<string>(type: "longtext", nullable: false),
+                    FechaPublicacion = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    AutorLibro = table.Column<Guid>(type: "char(36)", nullable: true),
+                    NewData = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_LibreriaMateriales", x => x.LibreriaMaterialId);
-                });
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
         }
 
         /// <inheritdoc />
