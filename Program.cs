@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using uttt.Micro.Libro.Extensions;
+using MediatR;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 
 // Nombre de la política CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
