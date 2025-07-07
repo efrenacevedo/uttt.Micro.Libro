@@ -3,7 +3,7 @@ using uttt.Micro.Libro.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//  CORS policy
+// Nombre de la política CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
@@ -25,12 +25,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configuración del pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -38,35 +35,29 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-    context.Response.Headers.Append("Access-Control-Allow-Methods", "*");
-    context.Response.Headers.Append("Access-Control-Allow-Headers", "*");
+// QUITAR este middleware manual porque puede causar problemas:
+// app.Use(async (context, next) =>
+// {
+//     context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+//     context.Response.Headers.Append("Access-Control-Allow-Methods", "*");
+//     context.Response.Headers.Append("Access-Control-Allow-Headers", "*");
 
-    if (context.Request.Method == "OPTIONS")
-    {
-        context.Response.StatusCode = 200;
-        return;
-    }
+//     if (context.Request.Method == "OPTIONS")
+//     {
+//         context.Response.StatusCode = 200;
+//         return;
+//     }
 
-    await next();
-});
+//     await next();
+// });
 
-app.UseSwagger();
-app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
-
-// Middleware
-app.UseHttpsRedirection();
-
-//  Aquí activas la política CORS
+// Activar CORS ANTES de cualquier middleware que use las solicitudes
 app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization();
 
-// Mapear controladores
 app.MapControllers();
 
 app.Run();
