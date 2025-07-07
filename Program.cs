@@ -2,13 +2,20 @@ using Microsoft.EntityFrameworkCore;
 using uttt.Micro.Libro.Extensions;
 using MediatR;
 using System.Reflection;
+using uttt.Micro.Libro.Percistence; // Ajusta según tu proyecto
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Registrar MediatR (asegúrate que los handlers estén en este ensamblado o ajusta)
+// Registrar DbContext con PostgreSQL
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<ContextoLibreria>(options =>
+    options.UseNpgsql(connectionString));  // Usa UseNpgsql para PostgreSQL
+
+// Registrar MediatR
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 
-// Nombre de la política CORS
+// Política CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
@@ -25,23 +32,22 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Resto de servicios
+// Servicios MVC y Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configuración del pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();  // Para mostrar errores detallados en desarrollo
+    app.UseDeveloperExceptionPage();  // Mejor debug en desarrollo
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Activar CORS ANTES de cualquier middleware que maneje las solicitudes
+// Usar CORS antes de otros middlewares que usen solicitudes
 app.UseCors(MyAllowSpecificOrigins);
 
 app.UseHttpsRedirection();
