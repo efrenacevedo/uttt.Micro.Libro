@@ -4,6 +4,8 @@ using MediatR;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Registrar MediatR (asegúrate que los handlers estén en este ensamblado o ajusta)
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 
 // Nombre de la política CORS
@@ -33,31 +35,16 @@ var app = builder.Build();
 // Configuración del pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();  // Para mostrar errores detallados en desarrollo
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// QUITAR este middleware manual porque puede causar problemas:
-// app.Use(async (context, next) =>
-// {
-//     context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-//     context.Response.Headers.Append("Access-Control-Allow-Methods", "*");
-//     context.Response.Headers.Append("Access-Control-Allow-Headers", "*");
-
-//     if (context.Request.Method == "OPTIONS")
-//     {
-//         context.Response.StatusCode = 200;
-//         return;
-//     }
-
-//     await next();
-// });
+// Activar CORS ANTES de cualquier middleware que maneje las solicitudes
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseHttpsRedirection();
-
-// Activar CORS ANTES de cualquier middleware que use las solicitudes
-app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization();
 
