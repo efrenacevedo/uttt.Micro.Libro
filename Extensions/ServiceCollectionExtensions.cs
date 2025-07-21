@@ -20,6 +20,8 @@ namespace uttt.Micro.Libro.Extensions
                     builder =>
                     {
                         builder.AllowAnyOrigin();
+                        builder.AllowAnyMethod();
+                        builder.AllowAnyHeader();
                     });
             });
             services.AddMediatR(typeof(Nuevo.Manejador).Assembly);
