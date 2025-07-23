@@ -12,7 +12,17 @@ var builder = WebApplication.CreateBuilder(args);
 // ?? Configurar JWT
 var key = builder.Configuration["Jwt:Key"];
 var issuer = builder.Configuration["Jwt:Issuer"];
-var keyBytes = Encoding.UTF8.GetBytes(key);
+var keyBytes = Encoding.UTF8.GetBytes(key ?? "");
+
+if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(issuer))
+{
+    Console.WriteLine("? Error: 'Jwt:Key' o 'Jwt:Issuer' no están configurados en appsettings.json o variables de entorno.");
+}
+else
+{
+    Console.WriteLine($"? JWT Key: {key}");
+    Console.WriteLine($"? JWT Issuer: {issuer}");
+}
 
 // Agregar autenticación JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -26,6 +36,33 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = issuer,
             IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+        };
+
+        // LOGS en eventos de validación
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine("? Error de autenticación JWT:");
+                Console.WriteLine(context.Exception.Message);
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("? Token validado correctamente para:");
+                Console.WriteLine(context.Principal?.Identity?.Name ?? "(sin nombre)");
+                return Task.CompletedTask;
+            },
+            OnMessageReceived = context =>
+            {
+                Console.WriteLine($"?? Token recibido: {context.Token}");
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                Console.WriteLine("?? Challenge lanzado (token faltante o inválido)");
+                return Task.CompletedTask;
+            }
         };
     });
 
