@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AutoMapper;
 using uttt.Micro.Libro.Percistence; // Ajusta según tu proyecto
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,9 @@ builder.Services.AddDbContext<ContextoLibreria>(options =>
 
 // Registrar MediatR
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+//Registrar IMapper
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {

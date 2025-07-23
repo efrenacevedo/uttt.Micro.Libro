@@ -25,7 +25,7 @@ namespace uttt.Micro.Libro.Extensions
                     });
             });
             services.AddMediatR(typeof(Nuevo.Manejador).Assembly);
-            services.AddAutoMapper(typeof(Consulta.Manejador));
+            services.AddAutoMapper(typeof(Consulta.Manejador).Assembly);
             return services;
         }
     }
