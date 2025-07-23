@@ -9,9 +9,18 @@ using AutoMapper;
 using uttt.Micro.Libro.Percistence; // Ajusta según tu proyecto
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
-var jwtKey = builder.Configuration["Jwt:Key"]; // lo guardas en appsettings.json
+// ?? Asegúrate de que no sea null
+var jwtKey = configuration["Jwt:Key"];
+
+
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+
+if (string.IsNullOrEmpty(jwtKey))
+{
+    throw new Exception("?? JWT Key (Jwt:Key) is missing in configuration!");
+}
 // Registrar DbContext con PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -23,20 +32,24 @@ builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 //Registrar IMapper
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer("Bearer", options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.Authority = "vistalibrosautores-production.up.railway.app"; // o deja vacío si no usas autoridad externa
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["JwtKey"]))
-        };
-    });
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = configuration["Jwt:Issuer"],
+        ValidAudience = configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
+});
 
 builder.Services.AddAuthorization();
 
