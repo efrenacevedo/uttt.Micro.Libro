@@ -1,73 +1,55 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using uttt.Micro.Libro.Extensions;
 using MediatR;
 using System.Reflection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using uttt.Micro.Libro.Percistence;
 using System.Text;
-using AutoMapper;
-using uttt.Micro.Libro.Percistence; // Ajusta según tu proyecto
 
 var builder = WebApplication.CreateBuilder(args);
-var configuration = builder.Configuration;
 
-// ?? Asegúrate de que no sea null
-var jwtKey = configuration["Jwt:Key"];
+// ?? Configurar JWT
+var key = builder.Configuration["Jwt:Key"];
+var issuer = builder.Configuration["Jwt:Issuer"];
+var keyBytes = Encoding.UTF8.GetBytes(key);
 
-
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-
-if (string.IsNullOrEmpty(jwtKey))
-{
-    throw new Exception("?? JWT Key (Jwt:Key) is missing in configuration!");
-}
-// Registrar DbContext con PostgreSQL
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddDbContext<ContextoLibreria>(options =>
-    options.UseNpgsql(connectionString));  // Usa UseNpgsql para PostgreSQL
-
-// Registrar MediatR
-builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
-//Registrar IMapper
-builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+// Agregar autenticación JWT
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = configuration["Jwt:Issuer"],
-        ValidAudience = configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-    };
-});
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = issuer,
+            IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+        };
+    });
 
-builder.Services.AddAuthorization();
+// ?? Registrar DbContext con PostgreSQL
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<ContextoLibreria>(options =>
+    options.UseNpgsql(connectionString));
 
-// Política CORS
+// ?? Registrar MediatR
+builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+
+// ?? CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
     {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
-// Servicios MVC y Swagger
+// ?? Servicios
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -76,17 +58,18 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();  // Mejor debug en desarrollo
+    app.UseDeveloperExceptionPage();
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Usar CORS antes de otros middlewares que usen solicitudes
+// ?? Orden correcto de middlewares
 app.UseCors(MyAllowSpecificOrigins);
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
+
+app.UseAuthentication(); // ?? MUY IMPORTANTE: antes de Authorization
 app.UseAuthorization();
 
 app.MapControllers();
