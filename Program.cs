@@ -2,10 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using uttt.Micro.Libro.Extensions;
 using MediatR;
 using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using uttt.Micro.Libro.Percistence; // Ajusta según tu proyecto
 
 var builder = WebApplication.CreateBuilder(args);
 
+var jwtKey = builder.Configuration["Jwt:Key"]; // lo guardas en appsettings.json
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 // Registrar DbContext con PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -14,6 +19,22 @@ builder.Services.AddDbContext<ContextoLibreria>(options =>
 
 // Registrar MediatR
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.Authority = "vistalibrosautores-production.up.railway.app"; // o deja vacío si no usas autoridad externa
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JwtKey"]))
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // Política CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -48,7 +69,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors(MyAllowSpecificOrigins);
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

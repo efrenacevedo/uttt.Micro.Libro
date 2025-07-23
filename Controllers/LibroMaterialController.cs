@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using uttt.Micro.Libro.Aplicacion;
 
 namespace uttt.Micro.Libro.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LibroMaterialController : ControllerBase
