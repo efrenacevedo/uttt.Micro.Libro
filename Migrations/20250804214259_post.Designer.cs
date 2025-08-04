@@ -12,8 +12,8 @@ using uttt.Micro.Libro.Percistence;
 namespace uttt.Micro.Libro.Migrations
 {
     [DbContext(typeof(ContextoLibreria))]
-    [Migration("20250721224725_aiven")]
-    partial class aiven
+    [Migration("20250804214259_post")]
+    partial class post
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

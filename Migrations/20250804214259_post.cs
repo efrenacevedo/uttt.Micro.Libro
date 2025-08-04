@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace uttt.Micro.Libro.Migrations
 {
     /// <inheritdoc />
-    public partial class aiven : Migration
+    public partial class post : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
